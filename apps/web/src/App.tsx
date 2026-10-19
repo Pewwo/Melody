@@ -22,6 +22,7 @@ import { usePlayer } from './context/PlayerContext';
 import { Track } from '@melody/core';
 import { offlineStorage } from './services/offlineStorage';
 import { supabase } from './services/supabaseClient';
+import { playlistService, PlaylistModel } from './services/playlistService';
 import { Home, Users, Library, Youtube, Compass } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -69,13 +70,18 @@ export const App: React.FC = () => {
 
   const favoriteIds = new Set(favoriteTracks.map((t) => t.id));
 
-  // Playlists state
-  const [playlists, setPlaylists] = useState<Array<{ id: string; name: string; tracks: Track[] }>>(() => {
-    const saved = localStorage.getItem('melody_playlists');
-    return saved ? JSON.parse(saved) : [
-      { id: 'fav_mix', name: 'My Chill Mix', tracks: [] },
-    ];
+  // Playlists state scoped to account
+  const [playlists, setPlaylists] = useState<PlaylistModel[]>(() => {
+    const savedUser = localStorage.getItem('melody_user');
+    const email = savedUser ? JSON.parse(savedUser)?.email : null;
+    return playlistService.getVisiblePlaylists(email);
   });
+
+  // Re-fetch visible playlists whenever user logs in or out
+  useEffect(() => {
+    const visible = playlistService.getVisiblePlaylists(currentUser?.email || null);
+    setPlaylists(visible);
+  }, [currentUser]);
 
   // Update browser document title on track changes
   useEffect(() => {
@@ -115,14 +121,10 @@ export const App: React.FC = () => {
     }
   }, []);
 
-  // Save favorites & playlists to localStorage
+  // Save favorites to localStorage
   useEffect(() => {
     localStorage.setItem('melody_favorites', JSON.stringify(favoriteTracks));
   }, [favoriteTracks]);
-
-  useEffect(() => {
-    localStorage.setItem('melody_playlists', JSON.stringify(playlists));
-  }, [playlists]);
 
   const toggleFavorite = (track: Track) => {
     setFavoriteTracks((prev) => {
@@ -136,32 +138,36 @@ export const App: React.FC = () => {
   };
 
   const handleCreatePlaylist = (name: string) => {
-    const newPl = {
-      id: `pl_${Date.now()}`,
-      name,
-      tracks: [],
-    };
-    setPlaylists((prev) => [...prev, newPl]);
+    playlistService.createPlaylist(name, currentUser?.email || null, currentUser?.username);
+    setPlaylists(playlistService.getVisiblePlaylists(currentUser?.email || null));
   };
 
   const handleAddTrackToPlaylist = (playlistId: string, track: Track) => {
-    setPlaylists((prev) =>
-      prev.map((pl) =>
-        pl.id === playlistId && !pl.tracks.some((t) => t.id === track.id)
-          ? { ...pl, tracks: [track, ...pl.tracks] }
-          : pl
-      )
-    );
+    playlistService.addTrack(playlistId, track);
+    setPlaylists(playlistService.getVisiblePlaylists(currentUser?.email || null));
   };
 
   const handleRemoveFromPlaylist = (playlistId: string, track: Track) => {
-    setPlaylists((prev) =>
-      prev.map((pl) =>
-        pl.id === playlistId
-          ? { ...pl, tracks: pl.tracks.filter((t) => t.id !== track.id) }
-          : pl
-      )
-    );
+    playlistService.removeTrack(playlistId, track.id);
+    setPlaylists(playlistService.getVisiblePlaylists(currentUser?.email || null));
+  };
+
+  const handleDeletePlaylist = (playlistId: string) => {
+    playlistService.deletePlaylist(playlistId, currentUser?.email || null);
+    setPlaylists(playlistService.getVisiblePlaylists(currentUser?.email || null));
+  };
+
+  const handleSharePlaylist = (playlistId: string, targetEmail: string) => {
+    const res = playlistService.sharePlaylist(playlistId, targetEmail, currentUser?.email || null);
+    if (res.success) {
+      setPlaylists(playlistService.getVisiblePlaylists(currentUser?.email || null));
+    }
+    return res;
+  };
+
+  const handleUnsharePlaylist = (playlistId: string, targetEmail: string) => {
+    playlistService.unsharePlaylist(playlistId, targetEmail, currentUser?.email || null);
+    setPlaylists(playlistService.getVisiblePlaylists(currentUser?.email || null));
   };
 
   const handleLogin = (email: string, username?: string, avatarUrl?: string) => {
@@ -287,9 +293,14 @@ export const App: React.FC = () => {
                 favoriteIds={favoriteIds}
                 onToggleFavorite={toggleFavorite}
                 playlists={playlists}
+                currentUser={currentUser}
                 onCreatePlaylist={handleCreatePlaylist}
                 onRemoveFromPlaylist={handleRemoveFromPlaylist}
+                onDeletePlaylist={handleDeletePlaylist}
+                onSharePlaylist={handleSharePlaylist}
+                onUnsharePlaylist={handleUnsharePlaylist}
                 onNavigateToDiscover={() => setCurrentView('home')}
+                onOpenAuth={() => setIsAuthOpen(true)}
               />
             )}
 

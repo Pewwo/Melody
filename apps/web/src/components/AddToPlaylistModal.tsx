@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
-import { ListMusic, Check, X, Music2, FolderPlus } from 'lucide-react';
+import { ListMusic, Check, X, Music2, FolderPlus, Users } from 'lucide-react';
 import { Track } from '@melody/core';
-
-interface Playlist {
-  id: string;
-  name: string;
-  tracks: Track[];
-}
+import { PlaylistModel } from '../services/playlistService';
 
 interface AddToPlaylistModalProps {
   isOpen: boolean;
   onClose: () => void;
   track: Track | null;
-  playlists: Playlist[];
+  playlists: PlaylistModel[];
   onAddToPlaylist: (playlistId: string, track: Track) => void;
   onCreatePlaylist: (name: string) => void;
 }
@@ -112,7 +107,9 @@ export const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-medium text-content-primary truncate">{pl.name}</p>
-                  <p className="text-[11px] text-content-tertiary">{pl.tracks.length} tracks</p>
+                  <p className="text-[11px] text-content-tertiary">
+                    {pl.tracks.length} tracks {pl.ownerName ? `· ${pl.ownerName}` : ''}
+                  </p>
                 </div>
                 {(alreadyAdded || isJustAdded) && (
                   <Check className="w-4 h-4 text-emerald-400 shrink-0" />
