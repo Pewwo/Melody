@@ -100,7 +100,7 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({
   const isYouTubeTrack = currentTrack.source === 'youtube';
 
   return (
-    <footer className="h-[72px] bg-bg-surface border-t border-bg-border px-4 md:px-6 flex items-center gap-4 z-30 select-none relative">
+    <footer className="h-14 md:h-[72px] bg-bg-surface/95 backdrop-blur-xl border-t border-bg-border px-3 md:px-6 flex items-center justify-between gap-2 md:gap-4 z-30 select-none relative shrink-0">
 
       {/* ── Toast notifications ── */}
       {(error || downloadError) && (
@@ -116,11 +116,29 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({
         </div>
       )}
 
+      {/* ── Mobile progress line at very top of player bar ── */}
+      <div className="md:hidden absolute top-0 left-0 right-0 h-[2px] bg-white/10">
+        <div
+          className="h-full bg-accent transition-all duration-200"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
       {/* ── Left: Artwork + Info ── */}
-      <div className="flex items-center gap-3 w-[220px] min-w-[180px] shrink-0">
+      <div 
+        className="flex items-center gap-2.5 min-w-0 flex-1 md:flex-initial md:w-[220px] md:min-w-[180px] shrink-0 cursor-pointer md:cursor-default"
+        onClick={() => {
+          if (window.innerWidth < 768) {
+            onToggleFullscreen();
+          }
+        }}
+      >
         <div 
-          className="relative group cursor-pointer w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-bg-border"
-          onClick={onToggleFullscreen}
+          className="relative group cursor-pointer w-9 h-9 md:w-11 md:h-11 rounded-lg overflow-hidden shrink-0 border border-bg-border"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFullscreen();
+          }}
         >
           <img
             src={currentTrack.artworkUrl}
@@ -132,20 +150,21 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({
           </div>
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 pr-1">
           <h4 
-            className="text-[13px] font-semibold text-content-primary truncate cursor-pointer hover:text-white transition"
-            onClick={onToggleFullscreen}
+            className="text-[12px] md:text-[13px] font-semibold text-content-primary truncate hover:text-white transition leading-tight"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFullscreen();
+            }}
           >
             {currentTrack.title}
           </h4>
-          <p className="text-[11px] text-content-secondary truncate mt-0.5">{currentTrack.artist}</p>
-
-
+          <p className="text-[10px] md:text-[11px] text-content-secondary truncate mt-0.5">{currentTrack.artist}</p>
         </div>
 
         {/* Like + Download (Download only for non-YouTube tracks) */}
-        <div className="flex items-center gap-0.5 shrink-0">
+        <div className="hidden sm:flex items-center gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={onToggleFavorite}
             className={`btn-icon transition ${isFavorite ? 'text-pink-500 !bg-pink-500/10' : ''}`}
@@ -175,8 +194,8 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({
         </div>
       </div>
 
-      {/* ── Center: Controls + Scrubber ── */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-1.5 max-w-[480px] mx-auto">
+      {/* ── Center: Controls + Scrubber (Desktop) ── */}
+      <div className="hidden md:flex flex-1 flex-col items-center justify-center gap-1.5 max-w-[480px] mx-auto">
         {/* Control row */}
         <div className="flex items-center gap-3">
           <button
@@ -220,11 +239,8 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({
               ? <Repeat1 className="w-3.5 h-3.5" /> 
               : <Repeat  className="w-3.5 h-3.5" />}
           </button>
-
-
         </div>
 
-        {/* Scrubber */}
         {/* Scrubber */}
         <div className="w-full flex items-center gap-2 text-[10px] font-mono text-content-tertiary">
           <span className="w-8 text-right tabular-nums">{formatTime(currentTime)}</span>
@@ -250,8 +266,41 @@ export const PlayerBar: React.FC<PlayerBarProps> = ({
         </div>
       </div>
 
-      {/* ── Right: Volume + Secondary Actions ── */}
-      <div className="flex items-center justify-end gap-1.5 w-[250px] min-w-[210px] shrink-0">
+      {/* ── Mobile Compact Controls (Right side on phones) ── */}
+      <div className="flex md:hidden items-center gap-1.5 shrink-0">
+        <button
+          onClick={onToggleFavorite}
+          className={`btn-icon w-8 h-8 ${isFavorite ? 'text-pink-500 !bg-pink-500/10' : ''}`}
+          title="Like"
+        >
+          <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+        </button>
+
+        <button
+          onClick={togglePlay}
+          disabled={isLoading}
+          className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-60"
+        >
+          {isLoading ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : isPlaying ? (
+            <Pause className="w-3.5 h-3.5 fill-black" />
+          ) : (
+            <Play className="w-3.5 h-3.5 fill-black ml-0.5" />
+          )}
+        </button>
+
+        <button
+          onClick={playNext}
+          className="btn-icon w-8 h-8"
+          title="Next"
+        >
+          <SkipForward className="w-4 h-4 fill-current text-content-primary" />
+        </button>
+      </div>
+
+      {/* ── Right: Volume + Secondary Actions (Desktop) ── */}
+      <div className="hidden md:flex items-center justify-end gap-1.5 w-[250px] min-w-[210px] shrink-0">
         {onOpenYouTubeModal && (
           <button onClick={onOpenYouTubeModal} className="btn-icon hover:text-[#ff0000]" title="Open YouTube">
             <Youtube className="w-4 h-4" />

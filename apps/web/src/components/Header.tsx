@@ -23,9 +23,9 @@ export const Header: React.FC<HeaderProps> = ({
   onPlayRandomFromHistory,
 }) => {
   return (
-    <header className="h-14 px-4 border-b border-bg-border bg-bg-surface/80 backdrop-blur-xl flex items-center sticky top-0 z-20 shrink-0 relative">
-      {/* Left — sidebar toggle */}
-      <div className="flex items-center gap-2 shrink-0">
+    <header className="h-14 px-3 md:px-4 border-b border-bg-border bg-bg-surface/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20 shrink-0 gap-2">
+      {/* Left — sidebar toggle (desktop only) */}
+      <div className="hidden md:flex items-center gap-2 shrink-0">
         <button
           onClick={onToggleSidebar}
           title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
@@ -37,10 +37,10 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
       </div>
 
-      {/* Center — search bar (absolutely centered) */}
-      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-sm px-4">
-        <div className="relative">
-          <Search className="w-3.5 h-3.5 text-content-tertiary absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+      {/* Center — search bar (flexible on mobile, centered max-w-sm on desktop) */}
+      <div className="flex-1 max-w-md mx-auto relative">
+        <div className="relative w-full">
+          <Search className="w-3.5 h-3.5 text-content-tertiary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
@@ -52,20 +52,20 @@ export const Header: React.FC<HeaderProps> = ({
               if (e.key === 'Enter') onSearchSubmit();
             }}
             placeholder="Search songs, artists…"
-            className="w-full h-9 bg-bg-card/80 border border-bg-border focus:border-white/15 focus:bg-bg-card focus:ring-1 focus:ring-white/10 rounded-xl pl-9 pr-4 text-[13px] text-content-primary placeholder-content-tertiary outline-none transition-all duration-200"
+            className="w-full h-8 md:h-9 bg-bg-card/80 border border-bg-border focus:border-white/15 focus:bg-bg-card focus:ring-1 focus:ring-white/10 rounded-xl pl-8 md:pl-9 pr-3 text-[12px] md:text-[13px] text-content-primary placeholder-content-tertiary outline-none transition-all duration-200"
           />
         </div>
       </div>
 
       {/* Right — Random Song based on listening history */}
       {onPlayRandomFromHistory && (
-        <div className="ml-auto relative z-10 flex items-center">
+        <div className="shrink-0 flex items-center">
           <button
             onClick={onPlayRandomFromHistory}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-accent/15 hover:bg-accent/25 border border-accent/25 text-accent-light text-[11px] font-semibold transition hover:scale-105 active:scale-95 shadow-glow-sm"
+            className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 rounded-full bg-accent/15 hover:bg-accent/25 border border-accent/25 text-accent-light text-[11px] font-semibold transition hover:scale-105 active:scale-95 shadow-glow-sm"
             title="Play a random surprise track based on your recently played music"
           >
-            <Dices className="w-3.5 h-3.5 animate-spin-slow" />
+            <Dices className="w-3.5 h-3.5 animate-spin-slow shrink-0" />
             <span className="hidden sm:inline">Surprise Mix</span>
           </button>
         </div>

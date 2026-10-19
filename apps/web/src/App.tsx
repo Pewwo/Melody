@@ -320,38 +320,6 @@ export const App: React.FC = () => {
         <QueuePanel isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden flex items-center justify-around bg-bg-surface border-t border-bg-border py-2 px-2 z-20 safe-area-bottom">
-        {[
-          { id: 'home',     label: 'Home',    icon: Home },
-          { id: 'explore',  label: 'Explore', icon: Compass },
-          { id: 'artists',  label: 'Artists', icon: Users },
-          { id: 'library',  label: 'Library', icon: Library },
-        ].map((item) => {
-          const Icon = item.icon;
-          const active = currentView === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setCurrentView(item.id as any)}
-              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl text-[11px] font-medium transition-colors ${
-                active ? 'text-white bg-accent/15' : 'text-content-secondary'
-              }`}
-            >
-              <Icon className={`w-5 h-5 ${active ? 'text-accent-light' : ''}`} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-        <button
-          onClick={() => setIsYouTubeModalOpen(true)}
-          className="flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl text-[11px] font-medium text-content-secondary"
-        >
-          <Youtube className="w-5 h-5 text-[#ff0000]" />
-          <span>YouTube</span>
-        </button>
-      </nav>
-
       {/* Persistent Bottom Player Bar */}
       <PlayerBar
         onToggleLyrics={() => setIsLyricsOpen(!isLyricsOpen)}
@@ -367,6 +335,38 @@ export const App: React.FC = () => {
         isFavorite={isCurrentFavorite}
         onToggleFavorite={() => currentTrack && toggleFavorite(currentTrack)}
       />
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden flex items-center justify-around bg-bg-surface/95 backdrop-blur-xl border-t border-bg-border py-1.5 px-2 z-30 shrink-0 safe-area-bottom">
+        {[
+          { id: 'home',     label: 'Home',    icon: Home },
+          { id: 'explore',  label: 'Explore', icon: Compass },
+          { id: 'artists',  label: 'Artists', icon: Users },
+          { id: 'library',  label: 'Library', icon: Library },
+        ].map((item) => {
+          const Icon = item.icon;
+          const active = currentView === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setCurrentView(item.id as any)}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-medium transition-colors ${
+                active ? 'text-white bg-accent/15' : 'text-content-secondary'
+              }`}
+            >
+              <Icon className={`w-4 h-4 ${active ? 'text-accent-light' : ''}`} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+        <button
+          onClick={() => setIsYouTubeModalOpen(true)}
+          className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-medium text-content-secondary"
+        >
+          <Youtube className="w-4 h-4 text-[#ff0000]" />
+          <span>YouTube</span>
+        </button>
+      </nav>
 
       {/* Persistent YouTube Player Host (Floating PiP & Audio Engine) */}
       <YouTubePlayerHost 

@@ -16,7 +16,7 @@ export const QueuePanel: React.FC<QueuePanelProps> = ({ isOpen, onClose }) => {
   const upNextTracks = queue.slice(queueIndex + 1);
 
   return (
-    <aside className="w-80 bg-melody-surface/95 backdrop-blur-xl border-l border-melody-border h-full flex flex-col z-20 select-none animate-in slide-in-from-right duration-200">
+    <aside className="w-full sm:w-80 bg-melody-surface/95 backdrop-blur-xl border-l border-melody-border h-full flex flex-col z-20 select-none animate-in slide-in-from-right duration-200">
       {/* Header */}
       <div className="p-4 border-b border-melody-border flex items-center justify-between">
         <div className="flex items-center gap-2">

@@ -32,9 +32,9 @@ export const YouTubePlayerHost: React.FC<YouTubePlayerHostProps> = ({
       <div
         className={`fixed transition-all duration-300 ${
           isFullscreenOpen && isYouTubeTrack
-            ? 'z-[60] top-24 left-1/2 -translate-x-1/2 w-[90vw] max-w-xl md:max-w-2xl lg:max-w-3xl aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-black'
+            ? 'z-[60] top-20 md:top-24 left-1/2 -translate-x-1/2 w-[92vw] max-w-xl md:max-w-2xl lg:max-w-3xl aspect-video rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-black'
             : shouldShowFloatingPiP
-            ? 'z-40 bottom-[80px] right-4 w-80 sm:w-96 bg-bg-base border border-bg-border rounded-xl shadow-card-lg overflow-hidden'
+            ? 'z-40 bottom-[120px] md:bottom-[80px] right-2 md:right-4 w-[calc(100vw-1rem)] sm:w-80 md:w-96 bg-bg-base border border-bg-border rounded-xl shadow-card-lg overflow-hidden'
             : 'fixed -bottom-[9999px] -right-[9999px] w-24 h-24 opacity-0 pointer-events-none'
         }`}
       >

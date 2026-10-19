@@ -50,25 +50,25 @@ export const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/90 pointer-events-none" />
 
       {/* ── Top Bar ── */}
-      <header className="relative z-10 flex items-center justify-between px-6 md:px-12 pt-6">
+      <header className="relative z-10 flex items-center justify-between px-4 md:px-12 pt-4 md:pt-6 shrink-0">
         {/* Source badge */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {isYouTubeTrack ? (
-            <div className="flex items-center gap-1.5 h-7 px-3 rounded-full bg-white/10 border border-white/15 text-[11px] font-medium text-white/90 backdrop-blur-md">
-              <div className="w-3.5 h-3.5 rounded-sm bg-[#ff0000] flex items-center justify-center">
+            <div className="flex items-center gap-1.5 h-6 md:h-7 px-2.5 md:px-3 rounded-full bg-white/10 border border-white/15 text-[10px] md:text-[11px] font-medium text-white/90 backdrop-blur-md">
+              <div className="w-3 md:w-3.5 h-3 md:h-3.5 rounded-sm bg-[#ff0000] flex items-center justify-center">
                 <svg className="w-2 h-2 fill-white" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path className="fill-[#ff0000]" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="white"/></svg>
               </div>
-              YouTube Official
+              YouTube
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 h-7 px-3 rounded-full bg-white/10 border border-white/15 text-[11px] font-medium text-white/90 backdrop-blur-md">
+            <div className="flex items-center gap-1.5 h-6 md:h-7 px-2.5 md:px-3 rounded-full bg-white/10 border border-white/15 text-[10px] md:text-[11px] font-medium text-white/90 backdrop-blur-md">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Local Audio
             </div>
           )}
 
           {isScreenOffAudioActive && (
-            <div className="flex items-center gap-1 h-7 px-3 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-[11px] text-emerald-300">
+            <div className="hidden sm:flex items-center gap-1 h-6 md:h-7 px-2.5 md:px-3 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-[10px] md:text-[11px] text-emerald-300">
               <Moon className="w-3 h-3" /> Screen-off
             </div>
           )}
@@ -76,21 +76,21 @@ export const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({
 
         <button
           onClick={onClose}
-          className="btn-icon w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full transition shadow-md"
+          className="btn-icon w-9 h-9 md:w-10 md:h-10 bg-white/10 hover:bg-white/20 text-white rounded-full transition shadow-md"
           title="Minimize Fullscreen"
         >
-          <Minimize2 className="w-5 h-5" />
+          <Minimize2 className="w-4 h-4 md:w-5 md:h-5" />
         </button>
       </header>
 
       {/* ── Center: Video Placeholder or Artwork + Info ── */}
-      <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 min-h-0">
+      <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-4 md:px-6 min-h-0 py-2">
         {isYouTubeTrack ? (
           /* Reserved spacer where the YouTube player mounts in Fullscreen */
-          <div className="w-[90vw] max-w-xl md:max-w-2xl lg:max-w-3xl aspect-video rounded-3xl mb-4 pointer-events-none" />
+          <div className="w-[92vw] max-w-xl md:max-w-2xl lg:max-w-3xl aspect-video rounded-2xl md:rounded-3xl mb-2 md:mb-4 pointer-events-none" />
         ) : (
           /* Album Artwork for non-YouTube tracks */
-          <div className="relative w-60 md:w-80 lg:w-96 aspect-square rounded-3xl overflow-hidden shadow-2xl border border-white/10 mb-6">
+          <div className="relative w-48 sm:w-60 md:w-80 lg:w-96 aspect-square rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border border-white/10 mb-4 md:mb-6">
             <img
               src={currentTrack.artworkUrl}
               alt={currentTrack.title}
@@ -107,22 +107,22 @@ export const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({
         )}
 
         {/* Title + Like */}
-        <div className="flex items-center gap-4 w-full max-w-xl md:max-w-2xl lg:max-w-3xl px-2">
+        <div className="flex items-center gap-3 w-full max-w-xl md:max-w-2xl lg:max-w-3xl px-2">
           <div className="flex-1 min-w-0">
-            <h2 className="font-display font-bold text-xl md:text-2xl text-white truncate">{currentTrack.title}</h2>
-            <p className="text-content-secondary text-sm md:text-base truncate mt-0.5">{currentTrack.artist}</p>
+            <h2 className="font-display font-bold text-lg md:text-2xl text-white truncate">{currentTrack.title}</h2>
+            <p className="text-content-secondary text-xs md:text-base truncate mt-0.5">{currentTrack.artist}</p>
           </div>
           <button
             onClick={onToggleFavorite}
-            className={`shrink-0 btn-icon w-11 h-11 rounded-full ${isFavorite ? 'text-pink-500 !bg-pink-500/15' : 'text-white/60 hover:text-white bg-white/5'}`}
+            className={`shrink-0 btn-icon w-9 h-9 md:w-11 md:h-11 rounded-full ${isFavorite ? 'text-pink-500 !bg-pink-500/15' : 'text-white/60 hover:text-white bg-white/5'}`}
           >
-            <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+            <Heart className={`w-4 h-4 md:w-5 md:h-5 ${isFavorite ? 'fill-current' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* ── Bottom Controls ── */}
-      <div className="relative z-10 w-full max-w-xl mx-auto px-6 pb-10 space-y-5">
+      <div className="relative z-10 w-full max-w-xl mx-auto px-4 md:px-6 pb-6 md:pb-10 space-y-4 md:space-y-5">
         {/* Scrubber */}
         <div className="space-y-1.5">
           <div className="relative flex items-center group cursor-pointer h-4">

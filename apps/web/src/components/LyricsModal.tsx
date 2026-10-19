@@ -97,38 +97,38 @@ export const LyricsModal: React.FC<LyricsModalProps> = ({ isOpen, onClose }) => 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex flex-col select-none animate-in fade-in duration-200">
       {/* Top Header */}
-      <header className="p-6 flex items-center justify-between border-b border-white/10 shrink-0">
-        <div className="flex items-center gap-4">
+      <header className="p-4 md:p-6 flex items-center justify-between border-b border-white/10 shrink-0 gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <img
             src={currentTrack.artworkUrl}
             alt={currentTrack.title}
-            className="w-12 h-12 rounded-xl object-cover shadow-lg"
+            className="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover shadow-lg shrink-0"
           />
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-white">{currentTrack.title}</h3>
+              <h3 className="text-base md:text-lg font-bold text-white truncate">{currentTrack.title}</h3>
               {lyrics?.synced && (
-                <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-melody-accent/30 text-melody-accentLight border border-melody-accent/40 font-mono">
+                <span className="hidden sm:flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-melody-accent/30 text-melody-accentLight border border-melody-accent/40 font-mono shrink-0">
                   <Sparkles className="w-2.5 h-2.5" />
                   Synced LRC
                 </span>
               )}
             </div>
-            <p className="text-xs text-melody-muted">{currentTrack.artist}</p>
+            <p className="text-xs text-melody-muted truncate">{currentTrack.artist}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setIsEditing(!isEditing)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs text-white font-medium transition"
           >
             {isEditing ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Edit3 className="w-3.5 h-3.5" />}
-            <span>{isEditing ? 'Cancel Edit' : 'Edit / Import'}</span>
+            <span className="hidden sm:inline">{isEditing ? 'Cancel Edit' : 'Edit / Import'}</span>
           </button>
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+            className="p-1.5 md:p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
           >
             <X className="w-5 h-5" />
           </button>
