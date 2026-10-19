@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Melody Music Player",
+    "slug": "melody-music-player",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#09090b"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.melody.musicplayer"
+    },
+    "android": {
+      "package": "com.melody.musicplayer",
+      "adaptiveIcon": {
+        "backgroundColor": "#09090b"
+      }
+    }
+  }
+}

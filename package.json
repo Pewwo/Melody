@@ -1,0 +1,18 @@
+{
+  "name": "melody-root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@melody/web",
+    "dev:web": "npm run dev --workspace=@melody/web",
+    "build:web": "npm run build --workspace=@melody/web",
+    "dev:mobile": "npm run start --workspace=@melody/mobile"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
