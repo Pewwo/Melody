@@ -131,6 +131,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   // 1. Initialize HTML5 Audio Element for native audio, screen-off & lockscreen playback
+  // NOTE: No deps — the audio element is created once and all handlers use refs for latest values.
   useEffect(() => {
     const audio = new Audio();
     audio.preload = 'auto';
@@ -152,17 +153,18 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setError(null);
     };
     const onTimeUpdate = () => {
-      if (audio && isScreenOffAudioActive) {
+      // Use ref so we always check the latest mode value
+      if (audio && isScreenOffAudioActiveRef.current) {
         setCurrentTime(audio.currentTime);
       }
     };
     const onLoadedMetadata = () => {
-      if (audio && !isNaN(audio.duration) && audio.duration > 0 && isScreenOffAudioActive) {
+      if (audio && !isNaN(audio.duration) && audio.duration > 0 && isScreenOffAudioActiveRef.current) {
         setDuration(audio.duration);
       }
     };
     const onError = () => {
-      if (!isScreenOffAudioActive) return;
+      if (!isScreenOffAudioActiveRef.current) return;
       setIsLoading(false);
       const track = currentTrackRef.current;
       if (track && track.mirrors && track.mirrors.length > mirrorIndexRef.current) {
@@ -194,7 +196,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('error', onError);
     };
-  }, [isScreenOffAudioActive]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 2. Initialize YouTube IFrame API (used for Video mode and video fallback)
   const initYouTubePlayer = useCallback(() => {
@@ -311,7 +314,13 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch {
       // Handle mount errors
     }
-  }, [volume, isMuted, isScreenOffAudioActive]);
+  // NOTE: isScreenOffAudioActive intentionally removed from deps.
+  // Previously, toggling it (which happens on every YouTube ↔ audio track switch)
+  // caused the YouTube player to be destroyed and re-created, losing its onStateChange
+  // handler and breaking auto-advance. We use isScreenOffAudioActiveRef inside the
+  // callbacks so they always read the latest value without needing a re-init.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [volume, isMuted]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -376,6 +385,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [volume, isMuted]);
 
   // 5. Track Ended Handler for HTML5 audio
+  // NOTE: No deps — we use refs inside the handler so it never needs to be re-registered.
+  // Re-registering on isScreenOffAudioActive changes caused a race where the listener
+  // was torn down just as a track ended, silently swallowing the "ended" event.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -395,7 +407,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => {
       audio.removeEventListener('ended', onEnded);
     };
-  }, [isScreenOffAudioActive]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 6. MediaSession Integration (Crucial for Lock Screen / Screen-Off controls & artwork)
   useEffect(() => {
@@ -466,26 +479,95 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const isYT = track.source === 'youtube' || track.streamUrl.startsWith('youtube:');
 
     if (isYT) {
-      // YouTube videos ALWAYS play via the official embedded IFrame player
-      setIsScreenOffAudioActive(false);
-      audioRef.current?.pause();
-      setPlaybackSource('stream');
-
       const videoId = track.youtubeId || extractYouTubeId(track.streamUrl) || track.id.replace('yt_', '');
+      const mediaModeNow = (localStorage.getItem('melody_media_mode') as MediaMode) || 'audio';
 
-      if (ytPlayerRef.current && isYtReadyRef.current) {
-        try {
-          ytPlayerRef.current.loadVideoById(videoId);
-          ytPlayerRef.current.playVideo();
-          setIsPlaying(true);
-          setIsLoading(false);
-        } catch {
-          setIsLoading(false);
-          setError('Failed to trigger YouTube video player.');
+      if (mediaModeNow === 'video') {
+        // VIDEO MODE: use YT iframe (cannot play locked, by design)
+        setIsScreenOffAudioActive(false);
+        audioRef.current?.pause();
+        setPlaybackSource('stream');
+
+        if (ytPlayerRef.current && isYtReadyRef.current) {
+          try {
+            ytPlayerRef.current.loadVideoById(videoId);
+            ytPlayerRef.current.playVideo();
+            setIsPlaying(true);
+            setIsLoading(false);
+          } catch {
+            setIsLoading(false);
+            setError('Failed to trigger YouTube video player.');
+          }
+        } else {
+          pendingYtIdRef.current = videoId;
+          setTimeout(() => initYouTubePlayer(), 200);
         }
       } else {
-        pendingYtIdRef.current = videoId;
-        setTimeout(() => initYouTubePlayer(), 200);
+        // AUDIO MODE: extract direct stream URL → play via HTML5 <audio> for lock-screen support
+        setIsScreenOffAudioActive(true);
+        if (ytPlayerRef.current && isYtReadyRef.current) {
+          try { ytPlayerRef.current.pauseVideo(); } catch {}
+        }
+        setPlaybackSource('stream');
+
+        if (!audioRef.current) return;
+
+        // Try to get a direct audio stream URL (Piped / Invidious)
+        let audioUrl: string | null = null;
+        try {
+          audioUrl = await youtubeStreamService.getAudioStreamUrl(videoId);
+        } catch {
+          audioUrl = null;
+        }
+
+        if (audioUrl) {
+          // Play via native audio element — works with screen off & lock screen
+          audioRef.current.src = audioUrl;
+          audioRef.current
+            .play()
+            .then(() => {
+              setIsPlaying(true);
+              setIsLoading(false);
+            })
+            .catch((err) => {
+              setIsLoading(false);
+              if (err.name !== 'AbortError') {
+                // Stream URL failed — fall back to iframe as last resort
+                setIsScreenOffAudioActive(false);
+                audioRef.current?.pause();
+                if (ytPlayerRef.current && isYtReadyRef.current) {
+                  try {
+                    ytPlayerRef.current.loadVideoById(videoId);
+                    ytPlayerRef.current.playVideo();
+                    setIsPlaying(true);
+                  } catch {
+                    setError('Playback failed. Try a different song.');
+                  }
+                } else {
+                  pendingYtIdRef.current = videoId;
+                  setTimeout(() => initYouTubePlayer(), 200);
+                }
+              }
+            });
+        } else {
+          // No stream URL available — fall back to iframe
+          setIsScreenOffAudioActive(false);
+          audioRef.current?.pause();
+          if (ytPlayerRef.current && isYtReadyRef.current) {
+            try {
+              ytPlayerRef.current.loadVideoById(videoId);
+              ytPlayerRef.current.playVideo();
+              setIsPlaying(true);
+              setIsLoading(false);
+            } catch {
+              setIsLoading(false);
+              setError('YouTube playback unavailable. Try a different song.');
+            }
+          } else {
+            pendingYtIdRef.current = videoId;
+            setTimeout(() => initYouTubePlayer(), 200);
+          }
+        }
       }
     } else {
       // REGULAR AUDIO PLAYBACK (Local files / Audius / Offline Blobs)

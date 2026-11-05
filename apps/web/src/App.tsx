@@ -23,7 +23,7 @@ import { Track } from '@melody/core';
 import { offlineStorage } from './services/offlineStorage';
 import { supabase } from './services/supabaseClient';
 import { playlistService, PlaylistModel } from './services/playlistService';
-import { Home, Users, Library, Youtube, Compass } from 'lucide-react';
+import { Home, Users, Library, Youtube, Compass, Search } from 'lucide-react';
 
 export const App: React.FC = () => {
   const { currentTrack, isPlaying, playRandomFromHistory } = usePlayer();
@@ -340,6 +340,7 @@ export const App: React.FC = () => {
       <nav className="md:hidden flex items-center justify-around bg-bg-surface/95 backdrop-blur-xl border-t border-bg-border py-1.5 px-2 z-30 shrink-0 safe-area-bottom">
         {[
           { id: 'home',     label: 'Home',    icon: Home },
+          { id: 'search',   label: 'Search',  icon: Search },
           { id: 'explore',  label: 'Explore', icon: Compass },
           { id: 'artists',  label: 'Artists', icon: Users },
           { id: 'library',  label: 'Library', icon: Library },
@@ -350,7 +351,7 @@ export const App: React.FC = () => {
             <button
               key={item.id}
               onClick={() => setCurrentView(item.id as any)}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-medium transition-colors ${
+              className={`flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-xl text-[10px] font-medium transition-colors ${
                 active ? 'text-white bg-accent/15' : 'text-content-secondary'
               }`}
             >
@@ -359,13 +360,6 @@ export const App: React.FC = () => {
             </button>
           );
         })}
-        <button
-          onClick={() => setIsYouTubeModalOpen(true)}
-          className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-medium text-content-secondary"
-        >
-          <Youtube className="w-4 h-4 text-[#ff0000]" />
-          <span>YouTube</span>
-        </button>
       </nav>
 
       {/* Persistent YouTube Player Host (Floating PiP & Audio Engine) */}
